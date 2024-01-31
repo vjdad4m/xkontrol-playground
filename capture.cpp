@@ -24,29 +24,25 @@ int main() {
   zmq::socket_t socket(context, ZMQ_SUB);
 
   // Connect to the publisher socket
-  socket.connect("tcp://localhost:5556");
-  socket.setsockopt(ZMQ_SUBSCRIBE, "", 0);
+  socket.connect("tcp://127.0.0.1:5556");
+  socket.set(zmq::sockopt::subscribe, "");
 
   std::cout << "Listening on port 5556 ..." << std::endl;
 
   while (true) {
     zmq::message_t message;
-    socket.recv(&message);
+    socket.recv(message, zmq::recv_flags::none);
 
-    // Make sure we received exactly 12 bytes
+    std::cout << "Received message of size " << message.size() << " bytes" << std::endl;
+
     if (message.size() == sizeof(XboxControllerState)) {
       XboxControllerState state;
       memcpy(&state, message.data(), sizeof(XboxControllerState));
 
-      // Print joystick positions as an example
       std::cout << "Joystick Left X: " << state.joystick_left_x << ", Y: " << state.joystick_left_y << std::endl;
       std::cout << "Joystick Right X: " << state.joystick_right_x << ", Y: " << state.joystick_right_y << std::endl;
-
-      // Process triggers
       std::cout << "Trigger Left: " << static_cast<int>(state.trigger_left)
                 << ", Trigger Right: " << static_cast<int>(state.trigger_right) << std::endl;
-
-      // Process buttons (You'll need to extract individual bits from dpad_and_buttons)
       std::cout << "DPad & Buttons: " << std::hex << static_cast<int>(state.dpad_and_buttons) << std::dec << std::endl;
     }
   }

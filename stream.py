@@ -1,3 +1,4 @@
+import time
 import zmq
 
 from xkontrol import XboxController
@@ -6,7 +7,7 @@ def setup_zmq_socket(port="5556"):
   # Create zmq session
   context = zmq.Context()
   socket = context.socket(zmq.PUB)
-  socket.bind(f"tcp://*:{port}")
+  socket.bind(f"tcp://0.0.0.0:{port}")
   return socket
 
 def main():
@@ -24,6 +25,7 @@ def main():
     
     # Send the raw bytes state over zmq
     socket.send(current_state)
+    time.sleep(0.01)
 
 if __name__ == "__main__":
   main()
