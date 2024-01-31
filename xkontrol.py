@@ -3,7 +3,7 @@ from threading import Thread
 
 get_binary = lambda x, n: format(x, 'b').zfill(n)
 
-class XboxControllerState:
+class XboxController:
   def __init__(self):
     # Joysticks
     self.joystick_left_x = 0    # 2 bytes (signed)
@@ -36,7 +36,7 @@ class XboxControllerState:
     self.button_thumb_right = 0 # 1 bit
   
   def get_state(self):
-    # Create a 94 bit state
+    # Create a 94 + 2 bit state
     state_string = ''
 
     # Joysticks
@@ -78,8 +78,11 @@ class XboxControllerState:
     state_string += buttons_state
     state_string += extra_state
 
-    # Convert to binary
-    return bin(int(state_string, 2))
+    # Add 2 bit padding
+    state_string += "00"
+
+    # Convert to bytes
+    return int(state_string, 2).to_bytes(12)
     
   def update(self):
     for event in get_gamepad():
@@ -168,7 +171,7 @@ class XboxControllerState:
     controller_thread.start()
 
 def main():
-  controller = XboxControllerState()
+  controller = XboxController()
   controller.run()
   while True:
     print(controller.get_state())
